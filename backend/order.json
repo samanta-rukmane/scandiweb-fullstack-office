@@ -1,0 +1,3 @@
+{
+  "query": "mutation { placeOrder(items: [{ productId: \"huarache-x-stussy-le\", quantity: 2, attributes: [\"40\"] }], total: 300) { id total items { product { id name } quantity attributes { name type items { value displayValue } } } } }"
+}
