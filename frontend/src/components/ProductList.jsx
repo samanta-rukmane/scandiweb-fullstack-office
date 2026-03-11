@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import ProductCard from "./ProductCard";
 
 export default function ProductList({ addToCart }) {
@@ -7,6 +7,8 @@ export default function ProductList({ addToCart }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const categoryName = slug ? slug.toUpperCase() : "ALL PRODUCTS";
 
   useEffect(() => {
     const categorySlug = slug || "all";
@@ -73,15 +75,18 @@ export default function ProductList({ addToCart }) {
     fetchProducts();
   }, [slug]);
 
-  if (loading) return <div className="products-state text-center py-20 text-gray-500"> Loading products... </div>;
-  if (error) return <div className="products-state text-center py-20 text-red-500">{error}</div>;
-  if (!products.length) return <div className="products-state text-center py-20 text-gray-500"> No products found. </div>;
+  if (loading) return <div className="products-state">Loading products...</div>;
+  if (error) return <div className="products-state error">{error}</div>;
+  if (!products.length) return <div className="products-state">No products found.</div>;
 
   return (
-    <div className="product-list grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      {products.map(product => (
-        <ProductCard key={product.id} product={product} addToCart={addToCart} />
-      ))}
+    <div className="product-list-container">
+      <div className="current-category"> {categoryName}</div>
+      <div className="product-list">
+        {products.map((product) => (
+          <ProductCard key={product.id} product={product} addToCart={addToCart} />
+        ))}
+      </div>
     </div>
   );
 }

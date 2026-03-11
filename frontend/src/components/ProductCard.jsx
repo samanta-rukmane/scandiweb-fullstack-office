@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 
 export default function ProductCard({ product, addToCart }) {
-
   const image = product.gallery?.[0];
 
   const handleQuickAdd = (e) => {

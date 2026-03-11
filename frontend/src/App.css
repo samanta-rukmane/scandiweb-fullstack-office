@@ -7,3 +7,52 @@
   margin: 0 auto;
   padding: 80px 100px;
 }
+
+/* ============================= */
+/* Cart Overlay */
+/* ============================= */
+
+.cart-title {
+  font-size: 16px;
+  margin-bottom: 32px;
+}
+
+.cart-empty {
+  text-align: center;
+  color: #8d8f9a;
+  margin: 40px 0;
+}
+
+.cart-total-row {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  margin-top: 24px;
+}
+
+.cart-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.cart-view-bag-btn {
+  flex: 1;
+  border: 1px solid #1D1F22;
+  background: white;
+  padding: 12px;
+  font-size: 14px;
+}
+
+.cart-checkout-btn {
+  flex: 1;
+  border: none;
+  background: #5ECE7B;
+  color: white;
+  padding: 12px;
+  font-size: 14px;
+}
+
+.cart-checkout-btn:disabled {
+  background: #ccc;
+}

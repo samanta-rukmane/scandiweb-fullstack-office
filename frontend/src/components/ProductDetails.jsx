@@ -17,7 +17,6 @@ export default function ProductDetails({ addToCart }) {
     const fetchProduct = async () => {
       try {
         setLoading(true);
-
         const query = `
         {
           product(id: "${productId}"){
@@ -46,14 +45,7 @@ export default function ProductDetails({ addToCart }) {
         });
 
         const result = await response.json();
-
-        if (result.errors) {
-          console.error("GraphQL errors full:", JSON.stringify(result.errors, null, 2));
-        }
-        console.log("GraphQL data full:", JSON.stringify(result.data, null, 2));
-
         const fetchedProduct = result?.data?.product;
-
         setProduct(fetchedProduct);
         setMainImage(fetchedProduct?.gallery?.[0] || "");
       } catch (error) {
@@ -78,10 +70,18 @@ export default function ProductDetails({ addToCart }) {
   const attributes = product.attributes || [];
   const allSelected = attributes.every((attr) => selectedAttributes[attr.name]);
 
+  const handleAddToCart = () => {
+    const attributesArray = Object.entries(selectedAttributes).map(([key, value]) => ({
+      id: key,
+      value
+    }));
+    addToCart({ ...product, selectedAttributes: attributesArray });
+  };
+
   return (
     <div className="product-page">
       <div className="product-gallery">
-        {product.gallery.map((img) => (
+        {product.gallery?.map((img) => (
           <img
             key={img}
             src={img}
@@ -93,11 +93,7 @@ export default function ProductDetails({ addToCart }) {
       </div>
 
       <div>
-        <img
-          src={mainImage}
-          alt={product.name}
-          className="product-main-image"
-        />
+        <img src={mainImage} alt={product.name} className="product-main-image" />
       </div>
 
       <div>
@@ -132,18 +128,18 @@ export default function ProductDetails({ addToCart }) {
         ))}
 
         <p className="price-label">PRICE:</p>
-        <p className="price-value">${parseFloat(product.price).toFixed(2)}</p>
+        <p className="price-value">${parseFloat(product.price ?? 0).toFixed(2)}</p>
 
         <button
           disabled={!allSelected || !product.inStock}
           className="add-to-cart-btn"
-          onClick={() => addToCart({ ...product, selectedAttributes })}
+          onClick={handleAddToCart}
         >
           ADD TO CART
         </button>
 
         <div className="mt-6 text-sm">
-          {parse(product.description)}
+          {product.description ? parse(product.description) : null}
         </div>
       </div>
     </div>

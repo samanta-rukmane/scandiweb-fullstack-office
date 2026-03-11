@@ -5,7 +5,9 @@ export default function CategoryList() {
   const [categories, setCategories] = useState([]);
   const location = useLocation();
 
-  const currentSlug = location.pathname.split("/")[2] || "all";
+  const currentSlug = location.pathname.startsWith("/category/")
+    ? location.pathname.replace("/category/", "")
+    : "all";
 
   useEffect(() => {
     fetch("http://localhost:8000/graphql", {

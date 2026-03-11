@@ -1,46 +1,84 @@
 import CartItem from "./CartItem";
 
-export default function CartOverlay({ cartItems, changeQuantity, total, clearCart, onClose, placeOrder }) {
+export default function CartOverlay({
+  cartItems,
+  changeQuantity,
+  total,
+  clearCart,
+  onClose,
+  placeOrder
+}) {
+
+  const totalItems = cartItems.reduce(
+    (sum, item) => sum + item.quantity,
+    0
+  );
+
   return (
     <>
-      <div className="cart-overlay-backdrop" onClick={onClose}></div>
+      <div
+        className="cart-overlay-backdrop"
+        onClick={onClose}
+      />
 
       <div className="cart-overlay">
-        <h2 className="text-xl font-bold mb-4"> Cart </h2>
 
-        {cartItems.length === 0 && (
-          <p className="text-gray-500 text-center"> Your cart is empty</p>
-        )}
-
-        {cartItems.map(item => (
-          <CartItem key={item.product.id + JSON.stringify(item.product.selectedAttributes)} item={item} changeQuantity={changeQuantity} />
-        ))}
-
-        <p data-testid="cart-total" className="font-bold mt-4">
-          Total: ${total.toFixed(2)}
+        <p className="cart-title">
+          <strong>My Bag</strong>, {totalItems} items
         </p>
 
-        <button
-          data-testid="place-order"
-          disabled={cartItems.length === 0}
-          className={`w-full mt-4 py-2 rounded text-white ${
-            cartItems.length === 0 ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-500"
-          }`}
-          onClick={() => {
-            placeOrder(cartItems);
-            clearCart();
-            onClose();
-          }}
-        >
-          Place Order
-        </button>
 
-        <button
-          className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
-          onClick={onClose}
-        >
-          ✕
-        </button>
+        {cartItems.length === 0 && (
+          <p className="cart-empty">
+            Your cart is empty
+          </p>
+        )}
+
+
+        {cartItems.map(item => (
+          <CartItem
+            key={item.product.id + JSON.stringify(item.product.selectedAttributes)}
+            item={item}
+            changeQuantity={changeQuantity}
+          />
+        ))}
+
+
+        <div className="cart-total-row">
+
+          <span>Total</span>
+
+          <span data-testid="cart-total">
+            ${total.toFixed(2)}
+          </span>
+
+        </div>
+
+
+        <div className="cart-actions">
+
+          <button
+            className="cart-view-bag-btn"
+            onClick={onClose}
+          >
+            VIEW BAG
+          </button>
+
+          <button
+            data-testid="place-order"
+            disabled={cartItems.length === 0}
+            className="cart-checkout-btn"
+            onClick={() => {
+              placeOrder(cartItems);
+              clearCart();
+              onClose();
+            }}
+          >
+            CHECK OUT
+          </button>
+
+        </div>
+
       </div>
     </>
   );
