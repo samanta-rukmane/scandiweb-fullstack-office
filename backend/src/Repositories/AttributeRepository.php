@@ -24,7 +24,8 @@ class AttributeRepository
             $attr['items'] = $stmtItems->fetchAll(\PDO::FETCH_ASSOC);
 
             $mapped = $this->mapToAttribute($attr);
-            if ($mapped !== null) {
+
+            if ($mapped instanceof \App\Models\Attribute\AbstractAttribute) {
                 $result[] = $mapped;
             }
         }

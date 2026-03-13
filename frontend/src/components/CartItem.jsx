@@ -5,14 +5,17 @@ export default function CartItem({ item, changeQuantity }) {
     <div data-testid="cart-item" className="cart-item">
       
       <div className="cart-item-info">
-        <p className="cart-item-name">{item.product.name}</p>
-        <p className="cart-item-price">${item.product.price.toFixed(2)}</p>
+        <p data-testid="cart-item-name" className="cart-item-name">{item.product.name}</p>
+        <p data-testid="cart-item-price" className="cart-item-price">${item.product.price.toFixed(2)}</p>
 
-        {item.product.selectedAttributes?.map(attr => (
-          <div key={attr.name} className="cart-item-attribute">
+        {item.product.selectedAttributes?.map((attr, i) => (
+            <div
+              key={`${attr.name}-${attr.value}-${i}`}
+              className="cart-item-attribute"
+            >
             <span className="cart-item-attribute-name">{attr.name}:</span>
             <span
-              data-testid="cart-item-attribute-selected"
+              data-testid={`cart-item-attribute-selected-${attr.name}`}
               className="cart-item-attribute-value"
             >
               {attr.value}

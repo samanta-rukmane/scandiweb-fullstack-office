@@ -8,9 +8,4 @@ class ConfigurableProduct extends AbstractProduct
     {
         return 'configurable';
     }
-
-    public function getAttributes(): array
-    {
-        return $this->attributes ?? [];
-    }
 }

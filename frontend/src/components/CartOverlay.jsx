@@ -14,6 +14,14 @@ export default function CartOverlay({
     0
   );
 
+  const handlePlaceOrder = async () => {
+    try {
+      await placeOrder(cartItems);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <>
       <div
@@ -24,9 +32,8 @@ export default function CartOverlay({
       <div className="cart-overlay">
 
         <p className="cart-title">
-          <strong>My Bag</strong>, {totalItems} items
+          <strong>My Bag</strong>, {totalItems} {totalItems === 1 ? 'item' : 'items'}
         </p>
-
 
         {cartItems.length === 0 && (
           <p className="cart-empty">
@@ -34,29 +41,22 @@ export default function CartOverlay({
           </p>
         )}
 
-
-        {cartItems.map(item => (
+        {cartItems.map((item) => (
           <CartItem
-            key={item.product.id + JSON.stringify(item.product.selectedAttributes)}
+            key={item.id || `${item.product.id}-${Math.random()}`}
             item={item}
             changeQuantity={changeQuantity}
           />
         ))}
 
-
         <div className="cart-total-row">
-
           <span>Total</span>
-
           <span data-testid="cart-total">
             ${total.toFixed(2)}
           </span>
-
         </div>
 
-
         <div className="cart-actions">
-
           <button
             className="cart-view-bag-btn"
             onClick={onClose}
@@ -68,17 +68,11 @@ export default function CartOverlay({
             data-testid="place-order"
             disabled={cartItems.length === 0}
             className="cart-checkout-btn"
-            onClick={() => {
-              placeOrder(cartItems);
-              clearCart();
-              onClose();
-            }}
+            onClick={handlePlaceOrder}
           >
             CHECK OUT
           </button>
-
         </div>
-
       </div>
     </>
   );

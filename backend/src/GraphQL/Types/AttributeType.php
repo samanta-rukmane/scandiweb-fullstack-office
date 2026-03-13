@@ -4,31 +4,24 @@ namespace App\GraphQL\Types;
 
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
+use App\Models\Attribute\AbstractAttribute;
 
 class AttributeType extends ObjectType
 {
     public function __construct()
     {
-        $config = [
+        $attributeItemType = new AttributeItemType();
+
+        parent::__construct([
             'name' => 'Attribute',
-            'description' => 'Represents a product attribute, e.g. color, size, etc.',
             'fields' => [
-                'name' => [
-                    'type' => Type::nonNull(Type::string()),
-                    'description' => 'The name of the attribute',
-                ],
-                'type' => [
-                    'type' => Type::nonNull(Type::string()),
-                    'description' => 'The type of attribute (text, swatch, etc.)',
-                ],
+                'name' => Type::nonNull(Type::string()),
+                'type' => Type::nonNull(Type::string()),
                 'items' => [
-                    'type' => Type::listOf(new AttributeItemType()),
-                    'description' => 'List of selectable items for this attribute',
-                    'resolve' => fn($attr) => $attr['items'] ?? [],
+                    'type' => Type::listOf($attributeItemType),
+                    'resolve' => fn(AbstractAttribute $attr) => $attr->getItems(),
                 ],
             ],
-        ];
-
-        parent::__construct($config);
+        ]);
     }
 }

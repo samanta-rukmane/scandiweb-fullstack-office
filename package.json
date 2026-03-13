@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "graphql-request": "^7.4.0",
     "html-react-parser": "^5.2.17"
   }
 }

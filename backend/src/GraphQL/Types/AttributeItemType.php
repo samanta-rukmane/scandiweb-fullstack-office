@@ -9,22 +9,12 @@ class AttributeItemType extends ObjectType
 {
     public function __construct()
     {
-        $config = [
+        parent::__construct([
             'name' => 'AttributeItem',
             'fields' => [
-                'value' => [
-                    'type' => Type::nonNull(Type::string()),
-                    'description' => 'Internal value of the attribute item',
-                ],
-                'displayValue' => [
-                    'type' => Type::nonNull(Type::string()),
-                    'description' => 'User-friendly display value',
-                    'resolve' => fn($item) => $item['display_value'] ?? $item['displayValue'] ?? null,
-                ],
+                'value' => Type::string(),
+                'displayValue' => Type::string(),
             ],
-            'description' => 'Represents a single selectable option of a product attribute',
-        ];
-
-        parent::__construct($config);
+        ]);
     }
 }

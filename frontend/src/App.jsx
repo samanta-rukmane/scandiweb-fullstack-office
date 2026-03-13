@@ -5,11 +5,35 @@ import Header from "./components/Header";
 import ProductList from "./components/ProductList";
 import ProductDetails from "./components/ProductDetails";
 import CartOverlay from "./components/CartOverlay";
+import { GraphQLClient, gql } from "graphql-request";
+
+const client = new GraphQLClient("http://localhost:8000/graphql", {
+  headers: {
+  },
+});
+
+const CREATE_ORDER = gql`
+  mutation CreateOrder($items: [OrderItemInput!]!) {
+    createOrder(items: $items) {
+      id
+      total
+      items {
+        productId
+        quantity
+        selectedAttributes {
+          name
+          value
+        }
+      }
+    }
+  }
+`;
 
 export default function App() {
 
   const [cartItems, setCartItems] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+
 
   const addToCart = (product) => {
 
@@ -29,7 +53,7 @@ export default function App() {
         );
       }
 
-      return [...prev, { product, quantity: 1 }];
+      return [...prev, { id: crypto.randomUUID(), product, quantity: 1 }];
     });
 
     setIsCartOpen(true);
@@ -50,7 +74,7 @@ export default function App() {
 
           return {
             ...item,
-            quantity: item.quantity + delta
+            quantity: Math.max(item.quantity + delta, 0)
           };
         })
         .filter((item) => item.quantity > 0)
@@ -63,17 +87,38 @@ export default function App() {
   };
 
 
-  const placeOrder = () => {
-    console.log("Order placed:", cartItems);
-  };
+  
+const placeOrder = async (cartItems) => {
+  if (cartItems.length === 0) return;
+
+  try {
+    const items = cartItems.map(item => ({
+      productId: item.product.id,
+      quantity: item.quantity,
+      attributes: item.product.selectedAttributes || [],
+    }));
+
+    const total = cartItems.reduce(
+      (sum, item) => sum + item.product.price * item.quantity,
+      0
+    );
+
+    await client.request(CREATE_ORDER, { items, total });
+
+    clearCart();
+    setIsCartOpen(false);
+    alert("Order successfully placed!");
+  } catch (error) {
+    console.error("Error placing order:", error);
+    alert("Order could not be placed. Please try again.");
+  }
+};
 
 
   const total = cartItems.reduce(
-    (sum, item) =>
-      sum + item.product.price * item.quantity,
+    (sum, item) => sum + item.product.price * item.quantity,
     0
   );
-
 
   const totalItems = cartItems.reduce(
     (sum, item) => sum + item.quantity,
@@ -84,7 +129,6 @@ export default function App() {
   return (
     <>
       <Header
-        cartItems={cartItems}
         totalItems={totalItems}
         openCart={() => setIsCartOpen(true)}
       />
@@ -115,7 +159,6 @@ export default function App() {
       </Routes>
 
       {isCartOpen && (
-
         <CartOverlay
           cartItems={cartItems}
           changeQuantity={changeQuantity}
@@ -124,7 +167,6 @@ export default function App() {
           placeOrder={placeOrder}
           onClose={() => setIsCartOpen(false)}
         />
-
       )}
 
     </>

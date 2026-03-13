@@ -10,7 +10,7 @@ abstract class AbstractProduct
     protected array $gallery;
     protected bool $inStock;
     protected ?string $categoryId = null;
-    protected ?string $description = null;
+    protected string $description = '';
 
     protected array $attributes = [];
 

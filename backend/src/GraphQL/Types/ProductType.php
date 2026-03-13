@@ -76,10 +76,16 @@ class ProductType extends ObjectType
 
                 'attributes' => [
                     'type' => Type::listOf($attributeType),
-                    'resolve' => function($product) {
-                        $attrs = $product->getAttributes() ?: [];
-                        return array_map(fn($attr) => $attr->toArray(), $attrs);
-                    }
+                    'resolve' => function(AbstractProduct $product) {
+                        $attrs = $product->getAttributes() ?? [];
+                        return array_map(function($attr) {
+                            return [
+                                'name' => method_exists($attr, 'getName') ? $attr->getName() ?? 'unknown' : 'unknown',
+                                'type' => method_exists($attr, 'getType') ? $attr->getType() ?? 'text' : 'text',
+                                'items' => method_exists($attr, 'getItems') ? $attr->getItems() ?? [] : [],
+                            ];
+                        }, $attrs);
+                    },
                 ],
             ]
         ]);

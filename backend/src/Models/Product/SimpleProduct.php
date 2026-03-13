@@ -8,9 +8,4 @@ class SimpleProduct extends AbstractProduct
     {
         return 'simple';
     }
-
-    public function getAttributes(): array
-    {
-        return $this->attributes ?? [];
-    }
 }

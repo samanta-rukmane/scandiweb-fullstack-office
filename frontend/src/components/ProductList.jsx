@@ -8,7 +8,7 @@ export default function ProductList({ addToCart }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const categoryName = slug ? slug.toUpperCase() : "ALL PRODUCTS";
+  const categoryName = slug ? slug.toUpperCase() : "ALL";
 
   useEffect(() => {
     const categorySlug = slug || "all";
@@ -51,7 +51,9 @@ export default function ProductList({ addToCart }) {
           body: JSON.stringify({ query }),
         });
 
-        const result = await response.json();
+        const text = await response.text();
+        console.log(text);
+        const result = JSON.parse(text);
 
         if (result.errors) {
           console.error("GraphQL errors:", result.errors);
