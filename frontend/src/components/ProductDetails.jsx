@@ -78,9 +78,26 @@ export default function ProductDetails({ addToCart }) {
     addToCart({ ...product, selectedAttributes: attributesArray });
   };
 
+    const showPrev = () => {
+    if (!product?.gallery) return;
+    const index = product.gallery.indexOf(mainImage);
+    const prevIndex = index === 0 ? product.gallery.length - 1 : index - 1;
+    setMainImage(product.gallery[prevIndex]);
+  };
+
+  const showNext = () => {
+    if (!product?.gallery) return;
+    const index = product.gallery.indexOf(mainImage);
+    const nextIndex = (index + 1) % product.gallery.length;
+    setMainImage(product.gallery[nextIndex]);
+  };
+
   return (
     <div className="product-page">
-      <div className="product-gallery">
+      <div
+        className="product-gallery"
+        data-testid="product-gallery"
+      >
         {product.gallery?.map((img) => (
           <img
             key={img}
@@ -92,8 +109,11 @@ export default function ProductDetails({ addToCart }) {
         ))}
       </div>
 
-      <div>
+      <div className="product-main-image-wrapper">
         <img src={mainImage} alt={product.name} className="product-main-image" />
+
+        <button className="gallery-arrow left" onClick={showPrev}>‹</button>
+        <button className="gallery-arrow right" onClick={showNext}>›</button>
       </div>
 
       <div>
@@ -101,22 +121,32 @@ export default function ProductDetails({ addToCart }) {
         <h3 className="text-xl mb-6">{product.name}</h3>
 
         {attributes.map((attr) => (
-          <div key={attr.name} className="attribute-container">
+          <div
+            key={attr.name}
+            className="attribute-container"
+            data-testid={`product-attribute-${attr.name}`}
+          >
             <strong className="attribute-label">{attr.name}:</strong>
             <div className="flex gap-2">
               {attr.type === "swatch"
                 ? attr.items.map((item) => (
                     <button
                       key={item.value}
+                      data-testid={`product-attribute-${attr.name}-${item.value}`}
                       style={{ backgroundColor: item.value }}
-                      className={`color-swatch ${selectedAttributes[attr.name] === item.value ? 'selected' : ''}`}
+                      className={`color-swatch ${
+                        selectedAttributes[attr.name] === item.value ? 'selected' : ''
+                      }`}
                       onClick={() => handleSelect(attr.name, item.value)}
                     />
                   ))
                 : attr.items.map((item) => (
                     <button
                       key={item.value}
-                      className={`attribute-btn ${selectedAttributes[attr.name] === item.value ? 'selected' : ''}`}
+                      data-testid={`product-attribute-${attr.name}-${item.value}`}
+                      className={`attribute-btn ${
+                        selectedAttributes[attr.name] === item.value ? 'selected' : ''
+                      }`}
                       onClick={() => handleSelect(attr.name, item.value)}
                     >
                       {item.displayValue || item.value}
@@ -127,10 +157,11 @@ export default function ProductDetails({ addToCart }) {
           </div>
         ))}
 
-        <p className="price-label">PRICE:</p>
+        <p className="price-label"> PRICE: </p>
         <p className="price-value">${parseFloat(product.price ?? 0).toFixed(2)}</p>
 
         <button
+          data-testid="add-to-cart"
           disabled={!allSelected || !product.inStock}
           className="add-to-cart-btn"
           onClick={handleAddToCart}
@@ -138,7 +169,10 @@ export default function ProductDetails({ addToCart }) {
           ADD TO CART
         </button>
 
-        <div className="mt-6 text-sm">
+        <div
+          className="mt-6 text-sm"
+          data-testid="product-description"
+        >
           {product.description ? parse(product.description) : null}
         </div>
       </div>

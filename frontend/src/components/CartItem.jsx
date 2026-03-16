@@ -3,32 +3,51 @@ export default function CartItem({ item, changeQuantity }) {
 
   return (
     <div data-testid="cart-item" className="cart-item">
-      
       <div className="cart-item-info">
-        <p data-testid="cart-item-name" className="cart-item-name">{item.product.name}</p>
-        <p data-testid="cart-item-price" className="cart-item-price">${item.product.price.toFixed(2)}</p>
+        <p className="cart-item-name">{item.product.name}</p>
+        <p className="cart-item-price">${item.product.price.toFixed(2)}</p>
 
-        {item.product.selectedAttributes?.map((attr, i) => (
-            <div
-              key={`${attr.name}-${attr.value}-${i}`}
-              className="cart-item-attribute"
-            >
-            <span className="cart-item-attribute-name">{attr.name}:</span>
-            <span
-              data-testid={`cart-item-attribute-selected-${attr.name}`}
-              className="cart-item-attribute-value"
-            >
-              {attr.value}
-            </span>
-          </div>
-        ))}
+        {item.product.attributes?.map((attr) => {
+          const selectedValue = item.selectedAttributes?.find(a => a.id === attr.name)?.value;
+
+          return (
+            <div key={attr.name} className="cart-item-attribute-block">
+              <p className="attribute-label">{attr.name}:</p>
+              <div className="attribute-options">
+                {attr.type === "swatch"
+                  ? attr.items.map((option) => (
+                      <button
+                        key={option.value}
+                        className={`color-swatch ${
+                          selectedValue === option.value ? 'selected' : ''
+                        }`}
+                        style={{ backgroundColor: option.value }}
+                        disabled
+                      />
+                    ))
+                  : attr.items.map((option) => (
+                      <button
+                        key={option.value}
+                        className={`attribute-btn ${
+                          selectedValue === option.value ? 'selected' : ''
+                        }`}
+                        disabled
+                      >
+                        {option.displayValue || option.value}
+                      </button>
+                    ))
+                }
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       <div className="cart-item-quantity">
         <button
           data-testid="cart-item-amount-increase"
           className="cart-qty-btn"
-          onClick={() => changeQuantity(item.product.id, item.product.selectedAttributes, 1)}
+          onClick={() => changeQuantity(item.product.id, item.selectedAttributes, 1)}
         >
           +
         </button>
@@ -38,7 +57,7 @@ export default function CartItem({ item, changeQuantity }) {
         <button
           data-testid="cart-item-amount-decrease"
           className="cart-qty-btn"
-          onClick={() => changeQuantity(item.product.id, item.product.selectedAttributes, -1)}
+          onClick={() => changeQuantity(item.product.id, item.selectedAttributes, -1)}
         >
           −
         </button>

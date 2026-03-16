@@ -18,7 +18,10 @@ export default function ProductCard({ product, addToCart }) {
   };
 
   return (
-    <div className="product-card" data-testid="product-card">
+    <div
+      className="product-card"
+      data-testid={`product-card-${product.id}`}
+    >
 
       <Link to={`/product/${product.id}`}>
 
@@ -30,7 +33,9 @@ export default function ProductCard({ product, addToCart }) {
           />
 
           {!product.inStock && (
-            <div className="out-of-stock">
+            <div
+              className={`product-card ${!product.inStock ? "out-of-stock" : ""}`}
+            >
               OUT OF STOCK
             </div>
           )}

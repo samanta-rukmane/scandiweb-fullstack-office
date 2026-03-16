@@ -29,10 +29,13 @@ export default function CartOverlay({
         onClick={onClose}
       />
 
-      <div className="cart-overlay">
+      <div
+        className="cart-overlay"
+        data-testid="cart-overlay"
+      >
 
         <p className="cart-title">
-          <strong>My Bag</strong>, {totalItems} {totalItems === 1 ? 'item' : 'items'}
+          <strong> My Bag</strong>, {totalItems} {totalItems === 1 ? 'item' : 'items'}
         </p>
 
         {cartItems.length === 0 && (
