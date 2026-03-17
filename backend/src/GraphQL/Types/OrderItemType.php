@@ -1,11 +1,12 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\GraphQL\Types;
 
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
+use App\GraphQL\Types\AttributeType;
+use App\GraphQL\Types\ProductType;
 
 class OrderItemType extends ObjectType
 {
@@ -31,9 +32,9 @@ class OrderItemType extends ObjectType
         parent::__construct([
             'name' => 'OrderItem',
             'fields' => [
-                'product' => new ProductType(),
+                'product' => ProductType::getInstance(),
                 'quantity' => Type::nonNull(Type::int()),
-                'attributes' => Type::listOf($attributeType),
+                'attributes' => Type::listOf(AttributeType::getInstance()),
             ],
         ]);
     }

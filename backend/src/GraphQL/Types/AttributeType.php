@@ -1,13 +1,21 @@
 <?php
-
 namespace App\GraphQL\Types;
 
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
-use App\Models\Attribute\AbstractAttribute;
 
 class AttributeType extends ObjectType
 {
+    private static $instance = null;
+
+    public static function getInstance()
+    {
+        if (self::$instance === null) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+
     public function __construct()
     {
         $attributeItemType = new AttributeItemType();
@@ -19,7 +27,7 @@ class AttributeType extends ObjectType
                 'type' => Type::nonNull(Type::string()),
                 'items' => [
                     'type' => Type::listOf($attributeItemType),
-                    'resolve' => fn(AbstractAttribute $attr) => $attr->getItems(),
+                    'resolve' => fn($attr) => $attr->getItems() ?? [],
                 ],
             ],
         ]);

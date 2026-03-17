@@ -1,5 +1,4 @@
 <?php
-
 namespace App\GraphQL\Types;
 
 use GraphQL\Type\Definition\ObjectType;

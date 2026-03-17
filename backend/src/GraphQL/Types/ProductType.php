@@ -9,6 +9,16 @@ use GraphQL\Type\Definition\Type;
 
 class ProductType extends ObjectType
 {
+    private static ?self $instance = null;
+
+    public static function getInstance(): self
+    {
+        if (!self::$instance) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+    
     public function __construct()
     {
         $attributeItemType = new ObjectType([

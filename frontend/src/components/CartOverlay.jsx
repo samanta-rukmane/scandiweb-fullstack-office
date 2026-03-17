@@ -15,12 +15,47 @@ export default function CartOverlay({
   );
 
   const handlePlaceOrder = async () => {
+    if (!cartItems.length) return;
+
+    const orderItems = cartItems.map(item => ({
+      productId: item.product.id,
+      quantity: item.quantity,
+      selectedAttributes: (item.selectedAttributes || []).map(attr => ({
+        name: attr.name,
+        value: attr.value
+      }))
+    }));
+
+    const query = `
+      mutation CreateOrder($items: [OrderItemInput!]!) {
+        createOrder(items: $items) {
+          id
+          status
+        }
+      }
+    `;
+
     try {
-      await placeOrder(cartItems);
-    } catch (error) {
-      console.error(error);
+      console.log("Order payload:", orderItems);
+      const response = await fetch('http://localhost:8000/graphql', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, variables: { items: orderItems } })
+      });
+
+      const { data } = await response.json();
+
+      clearCart();
+      onClose();
+    } catch (err) {
+      console.error('Error placing order:', err);
     }
   };
+
+  const computedTotal = cartItems.reduce(
+    (sum, item) => sum + item.quantity * (item.price ?? item.product?.price ?? item.product?.prices?.[0]?.amount ?? 0),
+    0
+  );
 
   return (
     <>
@@ -44,36 +79,45 @@ export default function CartOverlay({
           </p>
         )}
 
-        {cartItems.map((item) => (
-          <CartItem
-            key={item.id || `${item.product.id}-${Math.random()}`}
-            item={item}
-            changeQuantity={changeQuantity}
-          />
-        ))}
+        {cartItems.map((item) => {
+          const safeProduct = item.product || {
+            id: 'unknown',
+            name: 'Unknown Product',
+            attributes: [],
+            gallery: []
+          };
+
+          return (
+            <CartItem
+              key={
+                item.id ||
+                `${safeProduct.id}-${(item.selectedAttributes || []).map(a => a.value).join('-')}`
+              }
+              item={{
+                ...item,
+                product: safeProduct,
+                selectedAttributes: item.selectedAttributes || []
+              }}
+              changeQuantity={changeQuantity}
+            />
+          );
+        })}
 
         <div className="cart-total-row">
-          <span>Total</span>
-          <span data-testid="cart-total">
-            ${total.toFixed(2)}
+          <span className="total-label">Total</span>
+          <span className="total-value" data-testid="cart-total">
+            ${computedTotal.toFixed(2)}
           </span>
         </div>
 
         <div className="cart-actions">
           <button
-            className="cart-view-bag-btn"
-            onClick={onClose}
-          >
-            VIEW BAG
-          </button>
-
-          <button
             data-testid="place-order"
             disabled={cartItems.length === 0}
-            className="cart-checkout-btn"
+            className="place-order-btn"
             onClick={handlePlaceOrder}
           >
-            CHECK OUT
+            PLACE ORDER
           </button>
         </div>
       </div>

@@ -52,7 +52,6 @@ export default function ProductList({ addToCart }) {
         });
 
         const text = await response.text();
-        console.log(text);
         const result = JSON.parse(text);
 
         if (result.errors) {
