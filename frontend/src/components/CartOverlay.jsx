@@ -17,36 +17,45 @@ export default function CartOverlay({
   const handlePlaceOrder = async () => {
     if (!cartItems.length) return;
 
-    const orderItems = cartItems.map(item => ({
-      productId: item.product.id,
-      quantity: item.quantity,
-      selectedAttributes: (item.selectedAttributes || []).map(attr => ({
-        name: attr.name,
-        value: attr.value
-      }))
-    }));
-
     const query = `
-      mutation CreateOrder($items: [OrderItemInput!]!) {
-        createOrder(items: $items) {
-          id
-          status
-        }
+      mutation CreateOrder($items: [OrderItemInput!]!, $total: Float!) {
+        createOrder(items: $items, total: $total)
       }
     `;
 
+    const orderItems = cartItems.map(item => ({
+      productId: item.product.id,
+      quantity: item.quantity,
+      attributes: (item.selectedAttributes || []).map(attr => attr.value)
+    }));
+
+    const totalAmount = cartItems.reduce(
+      (sum, item) => sum + item.quantity * (item.price ?? item.product.price ?? 0),
+      0
+    );
+
     try {
-      console.log("Order payload:", orderItems);
-      const response = await fetch('http://localhost:8000/graphql', {
+      console.log("Order payload:", orderItems, totalAmount);
+
+      const resp = await fetch('http://localhost:8000/graphql', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query, variables: { items: orderItems } })
+        body: JSON.stringify({ query, variables: { items: orderItems, total: totalAmount } })
       });
 
-      const { data } = await response.json();
+      const json = await resp.json();
+      console.log("GraphQL FULL response:", JSON.stringify(json, null, 2));
 
-      clearCart();
-      onClose();
+      if (json.errors) {
+        console.error("GraphQL errors FULL:", JSON.stringify(json.errors, null, 2));
+      }
+
+      if (json.data?.createOrder) {
+        clearCart();
+        onClose();
+      } else {
+        console.error("Failed to place order", json);
+      }
     } catch (err) {
       console.error('Error placing order:', err);
     }

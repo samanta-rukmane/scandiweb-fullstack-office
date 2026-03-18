@@ -7,7 +7,7 @@ export default function ProductDetails({ addToCart }) {
   const productId = id;
 
   const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [mainImage, setMainImage] = useState("");
   const [selectedAttributes, setSelectedAttributes] = useState({});
 
@@ -71,11 +71,15 @@ export default function ProductDetails({ addToCart }) {
   const allSelected = attributes.every((attr) => selectedAttributes[attr.name]);
 
   const handleAddToCart = () => {
-    const attributesArray = Object.entries(selectedAttributes).map(([key, value]) => ({
-      id: key,
+    const attributesArray = Object.entries(selectedAttributes).map(([name, value]) => ({
+      name,
       value
     }));
-    addToCart({ ...product, selectedAttributes: attributesArray });
+
+    addToCart({
+      ...product,
+      selectedAttributes: attributesArray
+    });
   };
 
     const showPrev = () => {

@@ -18,48 +18,25 @@ export default function ProductCard({ product, addToCart }) {
   };
 
   return (
-    <div
-      className="product-card"
-      data-testid={`product-card-${product.id}`}
-    >
-
-      <Link to={`/product/${product.id}`}>
-
+    <div className="product-card">
+      <Link 
+        to={`/product/${product.id}`}
+        state={{ category: product.category?.slug || 'all' }}
+      >
         <div className="product-image-wrapper">
-          <img
-            src={image}
-            alt={product.name}
-            className="product-image"
-          />
-
-          {!product.inStock && (
-            <div
-              className={`product-card ${!product.inStock ? "out-of-stock" : ""}`}
-            >
-              OUT OF STOCK
-            </div>
-          )}
+          <img src={image} alt={product.name} className="product-image" />
+          {!product.inStock && <div className="out-of-stock">OUT OF STOCK</div>}
         </div>
 
         <div className="product-info">
           <p className="product-name">{product.name}</p>
-
-          <p className="product-price">
-            ${Number(product.price).toFixed(2)}
-          </p>
+          <p className="product-price">${Number(product.price).toFixed(2)}</p>
         </div>
-
       </Link>
 
       {product.inStock && (
-        <button
-          onClick={handleQuickAdd}
-          className="quick-shop-btn"
-        >
-          +
-        </button>
+        <button onClick={handleQuickAdd} className="quick-shop-btn">+</button>
       )}
-
     </div>
   );
 }

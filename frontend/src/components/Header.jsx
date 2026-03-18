@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 import CategoryList from "./CategoryList";
+import Logo from "./Logo";
+import CartIcon from "./CartIcon";
 
 export default function Header({ totalItems, openCart }) {
   return (
@@ -9,8 +11,8 @@ export default function Header({ totalItems, openCart }) {
         <CategoryList />
 
         <div className="logo">
-          <Link to="/" style={{ textDecoration: "none", color: "#1D1F22" }}>
-            Fullstack eCommerce
+          <Link to="/">
+            <Logo />
           </Link>
         </div>
 
@@ -19,7 +21,7 @@ export default function Header({ totalItems, openCart }) {
           className="cart-button"
           onClick={openCart}
         >
-          🛒
+          <CartIcon />
           {totalItems > 0 && (
             <span data-testid="cart-bubble" className="cart-bubble">
               {totalItems}

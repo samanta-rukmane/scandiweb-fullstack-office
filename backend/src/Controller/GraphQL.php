@@ -2,6 +2,10 @@
 
 namespace App\Controller;
 
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 use GraphQL\GraphQL as GraphQLBase;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ObjectType;
@@ -62,11 +66,17 @@ class GraphQL
 
             $output = $result->toArray();
         } catch (Throwable $e) {
-            $output = [
-                'errors' => [
-                    ['message' => $e->getMessage()]
-                ]
-            ];
+            http_response_code(500);
+
+            echo json_encode([
+                'error' => true,
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => explode("\n", $e->getTraceAsString())
+            ]);
+
+            exit;
         }
 
         header('Content-Type: application/json; charset=UTF-8');
@@ -118,14 +128,16 @@ class GraphQL
         $mutationType = new ObjectType([
             'name' => 'Mutation',
             'fields' => [
-                'placeOrder' => [
-                    'type' => $this->orderType,
+                'createOrder' => [
+                    'type' => Type::boolean(),
                     'args' => [
-                        'items' => Type::nonNull(Type::listOf(Type::nonNull($this->orderItemInputType))),
+                        'items' => Type::nonNull(Type::listOf(Type::nonNull($orderItemInputType))),
                         'total' => Type::nonNull(Type::float()),
                     ],
-                    'resolve' => fn($root, $args) =>
-                        $this->orderRepository->create($args['items'], $args['total']),
+                    'resolve' => function($root, $args) {
+                        $this->orderRepository->create($args['items'], $args['total']);
+                        return true;
+                    },
                 ],
             ],
         ]);
@@ -154,14 +166,5 @@ class GraphQL
         $this->productType = new ProductType();
         $this->categoryType = new CategoryType();
         $this->orderType = new OrderType();
-
-        $this->orderItemInputType = new InputObjectType([
-            'name' => 'OrderItemInput',
-            'fields' => [
-                'productId' => Type::nonNull(Type::string()),
-                'quantity' => Type::nonNull(Type::int()),
-                'attributes' => Type::listOf(Type::string()),
-            ],
-        ]);
     }
 }

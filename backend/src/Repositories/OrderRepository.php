@@ -37,9 +37,13 @@ class OrderRepository
             $finalItems = [];
 
             foreach ($items as $item) {
-                $product = $this->productRepository->findById((string)$item['productId']);
+                $productId = (string)$item['productId'];
+                error_log("CHECK PRODUCT ID: " . $productId);
+
+                $product = $this->productRepository->findById($productId);
+
                 if (!$product) {
-                    throw new \RuntimeException("Product with ID {$item['productId']} not found");
+                    throw new \RuntimeException("Product NOT FOUND: " . $productId);
                 }
 
                 $stmtItem->execute([
@@ -50,9 +54,21 @@ class OrderRepository
                 ]);
 
                 $formattedAttributes = [];
-                foreach ($product->getAttributes() as $attr) {
-                    $attrValues = array_map(fn($i) => $i['value'], $attr->getItems());
-                    $selectedValues = array_filter($item['attributes'], fn($val) => in_array($val, $attrValues, true));
+                $productAttributes = $product->getAttributes() ?? [];
+
+                    foreach ($productAttributes ?? [] as $attr) {
+                    $items = $attr->getItems() ?? [];
+
+                    $attrValues = array_map(
+                        fn($i) => is_array($i) ? $i['value'] : $i->getValue(),
+                        $items
+                    );
+                    $itemAttributes = $item['attributes'] ?? [];
+
+                    $selectedValues = array_filter(
+                        $itemAttributes,
+                        fn($val) => in_array($val, $attrValues, true)
+                    );
 
                     $attrItems = array_map(fn($val) => [
                         'value' => $val,
@@ -85,12 +101,11 @@ class OrderRepository
 
         } catch (\Exception $e) {
             $db->rollBack();
-            file_put_contents(
-                __DIR__ . '/../../order_error.log', 
-                date('Y-m-d H:i:s') . " - " . $e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL, 
-                FILE_APPEND
-            );
-            throw $e;
+
+            error_log("ORDER ERROR: " . $e->getMessage());
+            error_log($e->getTraceAsString());
+
+            throw new \RuntimeException($e->getMessage());
         }
     }
 }
