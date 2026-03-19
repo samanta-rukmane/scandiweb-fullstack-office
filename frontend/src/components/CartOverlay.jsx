@@ -26,7 +26,10 @@ export default function CartOverlay({
     const orderItems = cartItems.map(item => ({
       productId: item.product.id,
       quantity: item.quantity,
-      attributes: (item.selectedAttributes || []).map(attr => attr.value)
+      attributes: (item.selectedAttributes || []).map(attr => ({
+        name: attr.name,
+        value: attr.value
+      }))
     }));
 
     const totalAmount = cartItems.reduce(
@@ -35,8 +38,6 @@ export default function CartOverlay({
     );
 
     try {
-      console.log("Order payload:", orderItems, totalAmount);
-
       const resp = await fetch('http://localhost:8000/graphql', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -44,7 +45,6 @@ export default function CartOverlay({
       });
 
       const json = await resp.json();
-      console.log("GraphQL FULL response:", JSON.stringify(json, null, 2));
 
       if (json.errors) {
         console.error("GraphQL errors FULL:", JSON.stringify(json.errors, null, 2));

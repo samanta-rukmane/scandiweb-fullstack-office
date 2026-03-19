@@ -2,10 +2,12 @@
 
 namespace App\Models\Product;
 
+/**
+ * Represents a configurable product with selectable attributes
+ * (e.g., color, size, capacity)
+ */
 class ConfigurableProduct extends AbstractProduct
 {
-    public function getType(): string
-    {
-        return 'configurable';
-    }
+    // Return the type of the product
+    public function getType(): string { return 'configurable'; }
 }

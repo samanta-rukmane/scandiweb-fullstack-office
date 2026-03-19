@@ -1,18 +1,25 @@
 <?php
+
 namespace App\GraphQL\Types;
 
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 
+/**
+ * GraphQL type for product attributes
+ * Example: Color, Size, Capacity
+ */
 class AttributeType extends ObjectType
 {
-    private static $instance = null;
+    private static ?self $instance = null;
 
-    public static function getInstance()
+    // Get singleton instance of AttributeType
+    public static function getInstance(): self
     {
         if (self::$instance === null) {
             self::$instance = new self();
         }
+
         return self::$instance;
     }
 
@@ -21,12 +28,12 @@ class AttributeType extends ObjectType
         $attributeItemType = new AttributeItemType();
 
         parent::__construct([
-            'name' => 'Attribute',
+            'name'   => 'Attribute',
             'fields' => [
-                'name' => Type::nonNull(Type::string()),
-                'type' => Type::nonNull(Type::string()),
+                'name' => Type::nonNull(Type::string()), // Attribute name (e.g., Color)
+                'type' => Type::nonNull(Type::string()), // Attribute type (swatch or text)
                 'items' => [
-                    'type' => Type::listOf($attributeItemType),
+                    'type'    => Type::listOf($attributeItemType), // List of possible values
                     'resolve' => fn($attr) => $attr->getItems() ?? [],
                 ],
             ],

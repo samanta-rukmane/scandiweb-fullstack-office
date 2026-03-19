@@ -7,10 +7,15 @@ use App\Models\Product\AbstractProduct;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 
+/**
+ * GraphQL type for a Product
+ * Contains id, name, brand, description, price, gallery, stock status, and attributes
+ */
 class ProductType extends ObjectType
 {
     private static ?self $instance = null;
 
+    // Get singleton instance of ProductType
     public static function getInstance(): self
     {
         if (!self::$instance) {
@@ -18,9 +23,10 @@ class ProductType extends ObjectType
         }
         return self::$instance;
     }
-    
+
     public function __construct()
     {
+        // Define nested ObjectType for attribute items
         $attributeItemType = new ObjectType([
             'name' => 'AttributeItem',
             'fields' => [
@@ -29,6 +35,7 @@ class ProductType extends ObjectType
             ],
         ]);
 
+        // Define nested ObjectType for attributes
         $attributeType = new ObjectType([
             'name' => 'Attribute',
             'fields' => [
@@ -41,7 +48,6 @@ class ProductType extends ObjectType
         parent::__construct([
             'name' => 'Product',
             'fields' => [
-
                 'id' => [
                     'type' => Type::nonNull(Type::id()),
                     'resolve' => fn($product) =>
@@ -87,17 +93,12 @@ class ProductType extends ObjectType
                 'attributes' => [
                     'type' => Type::listOf($attributeType),
                     'resolve' => function(AbstractProduct $product) {
+                        // Map attributes to array using toArray() method
                         $attrs = $product->getAttributes() ?? [];
-                        return array_map(function($attr) {
-                            return [
-                                'name' => method_exists($attr, 'getName') ? $attr->getName() ?? 'unknown' : 'unknown',
-                                'type' => method_exists($attr, 'getType') ? $attr->getType() ?? 'text' : 'text',
-                                'items' => method_exists($attr, 'getItems') ? $attr->getItems() ?? [] : [],
-                            ];
-                        }, $attrs);
+                        return array_map(fn($attr) => $attr->toArray(), $attrs);
                     },
                 ],
-            ]
+            ],
         ]);
     }
 }

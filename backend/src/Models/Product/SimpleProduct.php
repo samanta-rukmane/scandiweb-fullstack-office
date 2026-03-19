@@ -2,10 +2,9 @@
 
 namespace App\Models\Product;
 
+// Represents a simple product without configurable attributes
 class SimpleProduct extends AbstractProduct
 {
-    public function getType(): string
-    {
-        return 'simple';
-    }
+    // Return the type of the product
+    public function getType(): string { return 'simple'; }
 }

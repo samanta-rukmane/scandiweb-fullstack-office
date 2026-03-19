@@ -30,66 +30,61 @@ class OrderRepository
             $orderId = (int)$db->lastInsertId();
 
             $stmtItem = $db->prepare("
-                INSERT INTO order_items (order_id, product_id, quantity, selected_attributes)
-                VALUES (:order_id, :product_id, :quantity, :selected_attributes)
+                INSERT INTO order_items (order_id, product_id, quantity)
+                VALUES (:order_id, :product_id, :quantity)
             ");
 
             $finalItems = [];
 
             foreach ($items as $item) {
-                $productId = (string)$item['productId'];
-                error_log("CHECK PRODUCT ID: " . $productId);
+            $productId = (string)$item['productId'];
+            $product = $this->productRepository->findById($productId);
 
-                $product = $this->productRepository->findById($productId);
+            if (!$product) throw new \RuntimeException("Product NOT FOUND: " . $productId);
 
-                if (!$product) {
-                    throw new \RuntimeException("Product NOT FOUND: " . $productId);
-                }
+            $stmtItem->execute([
+                'order_id' => $orderId,
+                'product_id' => $product->getId(),
+                'quantity' => $item['quantity']
+            ]);
 
-                $stmtItem->execute([
-                    'order_id' => $orderId,
-                    'product_id' => $product->getId(),
-                    'quantity' => $item['quantity'],
-                    'selected_attributes' => json_encode($item['attributes'])
+            $orderItemId = (int)$db->lastInsertId();
+
+            $itemAttributes = $item['attributes'] ?? [];
+            foreach ($itemAttributes as $attr) {
+                if (!isset($attr['name']) || !isset($attr['value'])) continue;
+
+                $stmtAttr = $db->prepare("
+                    INSERT INTO order_item_attributes (order_item_id, attribute_name, attribute_value)
+                    VALUES (:order_item_id, :attribute_name, :attribute_value)
+                ");
+                $stmtAttr->execute([
+                    'order_item_id' => $orderItemId,
+                    'attribute_name' => $attr['name'],
+                    'attribute_value' => $attr['value']
                 ]);
-
-                $formattedAttributes = [];
-                $productAttributes = $product->getAttributes() ?? [];
-
-                    foreach ($productAttributes ?? [] as $attr) {
-                    $items = $attr->getItems() ?? [];
-
-                    $attrValues = array_map(
-                        fn($i) => is_array($i) ? $i['value'] : $i->getValue(),
-                        $items
-                    );
-                    $itemAttributes = $item['attributes'] ?? [];
-
-                    $selectedValues = array_filter(
-                        $itemAttributes,
-                        fn($val) => in_array($val, $attrValues, true)
-                    );
-
-                    $attrItems = array_map(fn($val) => [
-                        'value' => $val,
-                        'displayValue' => $val
-                    ], $selectedValues);
-
-                    if (!empty($attrItems)) {
-                        $formattedAttributes[] = [
-                            'name' => $attr->getName(),
-                            'type' => $attr->getTypeName(),
-                            'items' => $attrItems
-                        ];
-                    }
-                }
-
-                $finalItems[] = [
-                    'product' => $product,
-                    'quantity' => $item['quantity'],
-                    'attributes' => $formattedAttributes
-                ];
             }
+
+            $formattedAttributes = [];
+            if (is_array($itemAttributes)) {
+                foreach ($itemAttributes as $attr) {
+                    if (!is_array($attr)) continue;
+                    if (!isset($attr['name']) || !isset($attr['value'])) continue;
+
+                    $formattedAttributes[] = [
+                        'name' => $attr['name'],
+                        'type' => null,
+                        'items' => [['value' => $attr['value'], 'displayValue' => $attr['value']]]
+                    ];
+                }
+            }
+
+            $finalItems[] = [
+                'product' => $product,
+                'quantity' => $item['quantity'],
+                'attributes' => $formattedAttributes
+            ];
+        }
 
             $db->commit();
 
