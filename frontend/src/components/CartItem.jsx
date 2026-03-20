@@ -17,7 +17,11 @@ export default function CartItem({ item, changeQuantity }) {
           const selectedValue = getSelectedValue(attr.name);
 
           return (
-            <div key={attr.name} className="cart-item-attribute-block">
+            <div
+              key={attr.name}
+              className="cart-item-attribute-block"
+              data-testid={`cart-item-attr-${attr.name.toLowerCase()}`}
+            >
               <p className="cart-item-attribute-label">
                 {attr.name.charAt(0).toUpperCase() + attr.name.slice(1)}:
               </p>
@@ -31,6 +35,7 @@ export default function CartItem({ item, changeQuantity }) {
                           key={option.value}
                           className={`cart-item-color-swatch ${isSelected ? "selected" : ""}`}
                           style={{ backgroundColor: option.value }}
+                          data-testid={`cart-item-color-${option.value}`}
                         />
                       );
                     })
@@ -40,6 +45,7 @@ export default function CartItem({ item, changeQuantity }) {
                         <div
                           key={option.value}
                           className={`cart-item-attribute-btn ${isSelected ? "selected" : ""}`}
+                          data-testid={`cart-item-attr-value-${option.value}`}
                         >
                           {option.displayValue || option.value}
                         </div>
@@ -51,10 +57,10 @@ export default function CartItem({ item, changeQuantity }) {
         })}
       </div>
 
-      {/* QUANTITY */}
       <div className="cart-item-quantity">
         <button
           className="cart-qty-btn"
+          data-testid="cart-item-amount-increase"
           onClick={() =>
             changeQuantity(item.product.id, item.selectedAttributes, 1)
           }
@@ -62,10 +68,11 @@ export default function CartItem({ item, changeQuantity }) {
           +
         </button>
 
-        <span>{item.quantity}</span>
+        <span data-testid="cart-item-amount">{item.quantity}</span>
 
         <button
           className="cart-qty-btn"
+          data-testid="cart-item-amount-decrease"
           onClick={() =>
             changeQuantity(item.product.id, item.selectedAttributes, -1)
           }

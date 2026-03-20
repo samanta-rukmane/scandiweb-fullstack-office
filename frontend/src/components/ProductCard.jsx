@@ -4,18 +4,19 @@ export default function ProductCard({ product, addToCart }) {
   const image = product.gallery?.[0];
 
   const handleQuickAdd = (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const selectedAttributes = product.attributes?.map(attr => ({
-      id: attr.id,
-      value: attr.items[0].value
-    }));
+  const selectedAttributes = product.attributes?.map(attr => ({
+    name: attr.name,
+    value: attr.items[0].value
+  })) || [];
 
-    addToCart({
-      ...product,
-      selectedAttributes
-    });
-  };
+  addToCart({
+    ...product,
+    selectedAttributes,
+    quantity: 1
+  });
+};
 
   return (
     <div className="product-card">

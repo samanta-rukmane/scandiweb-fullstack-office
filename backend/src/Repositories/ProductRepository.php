@@ -8,6 +8,7 @@ use App\Config\Database;
 use App\Models\Product\AbstractProduct;
 use App\Models\Product\ProductFactory;
 
+// Repository for managing products
 class ProductRepository
 {
     private AttributeRepository $attributeRepo;
@@ -17,8 +18,11 @@ class ProductRepository
         $this->attributeRepo = new AttributeRepository();
     }
 
-
-    /** @return AbstractProduct[] */
+    /**
+     * Get all products
+     *
+     * @return AbstractProduct[]
+     */
     public function findAll(): array
     {
         $db = Database::getConnection();
@@ -27,7 +31,12 @@ class ProductRepository
         return array_map([$this, 'mapToProduct'], $rows);
     }
 
-
+    /**
+     * Find a product by its ID
+     *
+     * @param string $id
+     * @return AbstractProduct|null
+     */
     public function findById(string $id): ?AbstractProduct
     {
         $db = Database::getConnection();
@@ -35,19 +44,20 @@ class ProductRepository
         $stmt->execute(['id' => $id]);
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-        if (!$row) {
-            return null;
-        }
-
-        return $this->mapToProduct($row);
+        return $row ? $this->mapToProduct($row) : null;
     }
 
-
-    /** @return AbstractProduct[] */
+    /**
+     * Find products by category name
+     *
+     * @param string $categoryName
+     * @return AbstractProduct[]
+     */
     public function findByCategory(string $categoryName): array
     {
         $db = Database::getConnection();
-        $stmt = $db->prepare("SELECT id FROM categories WHERE name = :name LIMIT 1");
+
+        $stmt = $db->prepare("SELECT id FROM categories WHERE LOWER(name) = :name LIMIT 1");
         $stmt->execute(['name' => strtolower($categoryName)]);
         $category = $stmt->fetch(\PDO::FETCH_ASSOC);
 
@@ -62,33 +72,44 @@ class ProductRepository
         return array_map([$this, 'mapToProduct'], $rows);
     }
 
-
+    /**
+     * Map a raw DB row to a product instance
+     *
+     * @param array $row
+     * @return AbstractProduct
+     */
     private function mapToProduct(array $row): AbstractProduct
     {
         $db = Database::getConnection();
 
+        // Fetch price
         $stmt = $db->prepare("SELECT amount FROM prices WHERE product_id = :pid LIMIT 1");
         $stmt->execute(['pid' => $row['id']]);
         $priceRow = $stmt->fetch(\PDO::FETCH_ASSOC);
-        $price = $priceRow ? (float)$priceRow['amount'] : 0.0;
+        $price = $priceRow ? (float) $priceRow['amount'] : 0.0;
 
+        // Fetch gallery images
         $stmt = $db->prepare("SELECT image_url FROM product_galleries WHERE product_id = :pid");
         $stmt->execute(['pid' => $row['id']]);
         $galleryRows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        $gallery = array_map(fn($r) => $r['image_url'] ?? '', $galleryRows);
+        $gallery = array_map(fn(array $r) => $r['image_url'] ?? '', $galleryRows);
 
-        $rawAttributes = $this->attributeRepo->findByProductId((string)$row['id']) ?? [];
-        $attributes = array_filter($rawAttributes, fn($attr) => $attr instanceof \App\Models\Attribute\AbstractAttribute);
+        // Fetch attributes
+        $rawAttributes = $this->attributeRepo->findByProductId((string) $row['id']) ?? [];
+        $attributes = array_filter(
+            $rawAttributes,
+            fn($attr) => $attr instanceof \App\Models\Attribute\AbstractAttribute
+        );
 
         $data = [
-            'id' => (string)$row['id'],
-            'name' => $row['name'],
-            'brand' => $row['brand'],
+            'id' => (string) ($row['id'] ?? ''),
+            'name' => $row['name'] ?? '',
+            'brand' => $row['brand'] ?? '',
             'price' => $price,
-            'inStock' => (bool)$row['in_stock'],
+            'inStock' => (bool) ($row['in_stock'] ?? false),
             'gallery' => $gallery,
             'attributes' => $attributes,
-            'categoryId' => (string)$row['category_id'],
+            'categoryId' => (string) ($row['category_id'] ?? ''),
             'description' => $row['description'] ?? '',
             'type' => $row['type'] ?? 'simple',
         ];

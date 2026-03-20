@@ -38,7 +38,8 @@ export default function CartOverlay({
     );
 
     try {
-      const resp = await fetch('http://localhost:8000/graphql', {
+      const GRAPHQL_URL = import.meta.env.VITE_GRAPHQL_URL || 'http://localhost:8000/graphql';
+      const resp = await fetch(GRAPHQL_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query, variables: { items: orderItems, total: totalAmount } })

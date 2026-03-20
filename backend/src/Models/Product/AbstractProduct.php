@@ -1,11 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\Product;
 
-/**
- * Abstract class for all product types
- * Contains common fields and methods shared by all products
- */
+// Base class for all product types
 abstract class AbstractProduct
 {
     protected string $id;
@@ -14,28 +13,25 @@ abstract class AbstractProduct
     protected float $price;
     protected array $gallery;
     protected bool $inStock;
-    protected ?string $categoryId = null;
-    protected string $description = '';
-    protected array $attributes = [];
+    protected ?string $categoryId;
+    protected string $description;
+    protected array $attributes;
 
-    // Initialize product with data array
     public function __construct(array $data)
     {
-        $this->id = (string)($data['id'] ?? '');
+        $this->id = (string) ($data['id'] ?? '');
         $this->name = $data['name'] ?? '';
         $this->brand = $data['brand'] ?? '';
-        $this->price = (float)($data['price'] ?? 0);
+        $this->price = (float) ($data['price'] ?? 0);
         $this->gallery = $data['gallery'] ?? [];
-        $this->inStock = (bool)($data['inStock'] ?? false);
+        $this->inStock = (bool) ($data['inStock'] ?? false);
         $this->categoryId = $data['categoryId'] ?? null;
         $this->attributes = $data['attributes'] ?? [];
         $this->description = $data['description'] ?? '';
     }
 
-    // Return the type of the product
+    // Each product defines its own type
     abstract public function getType(): string;
-
-    // Getters for product properties
     public function getId(): string { return $this->id; }
     public function getName(): string { return $this->name; }
     public function getBrand(): string { return $this->brand; }

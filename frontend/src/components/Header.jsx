@@ -20,13 +20,9 @@ export default function Header({ totalItems, openCart }) {
           data-testid="cart-btn"
           className="cart-button"
           onClick={openCart}
+          aria-label="Open cart"
         >
-          <CartIcon />
-          {totalItems > 0 && (
-            <span data-testid="cart-bubble" className="cart-bubble">
-              {totalItems}
-            </span>
-          )}
+          <CartIcon count={totalItems} />
         </button>
 
       </div>

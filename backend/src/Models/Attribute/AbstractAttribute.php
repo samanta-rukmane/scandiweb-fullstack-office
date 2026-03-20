@@ -18,7 +18,7 @@ abstract class AbstractAttribute
     {
         $this->id    = $data['id'] ?? '';
         $this->name  = $data['name'] ?? '';
-        $this->type  = $this->getType(); // polymorphic type
+        $this->type = $data['type'] ?? $this->getType();
         $this->items = $data['items'] ?? [];
     }
 
@@ -42,7 +42,7 @@ abstract class AbstractAttribute
         return [
             'name'  => $this->name,
             'type'  => $this->type,
-            'items' => $items,
+            'items' => $this->items,
         ];
     }
 }
